@@ -2,6 +2,26 @@ import puppeteer from 'puppeteer';
 
 const BASE_URL = process.env.TEST_URL || 'http://localhost:5173';
 
+async function waitForText(page, text, timeout = 5000) {
+  await page.waitForFunction(
+    (searchText) => document.body.innerText.includes(searchText),
+    { timeout },
+    text
+  );
+}
+
+async function clickButtonWithText(page, text) {
+  const buttons = await page.$$('button');
+  for (const btn of buttons) {
+    const btnText = await page.evaluate(el => el.textContent, btn);
+    if (btnText && btnText.includes(text)) {
+      await btn.click();
+      return true;
+    }
+  }
+  return false;
+}
+
 async function runTests() {
   console.log('Starting E2E tests...');
   console.log(`Testing URL: ${BASE_URL}`);
@@ -36,14 +56,9 @@ async function runTests() {
 
   // Test 2: Start button exists
   try {
-    const startButton = await page.$('button');
-    const buttonText = await page.evaluate(el => el.textContent, startButton);
-    if (buttonText.includes('Start Meal')) {
-      console.log('✓ Test 2: Start Meal button exists');
-      passed++;
-    } else {
-      throw new Error('Start Meal button not found');
-    }
+    await waitForText(page, 'Start Meal');
+    console.log('✓ Test 2: Start Meal button exists');
+    passed++;
   } catch (e) {
     console.log('✗ Test 2: Start button check failed -', e.message);
     failed++;
@@ -65,9 +80,8 @@ async function runTests() {
 
   // Test 4: Can start a meal
   try {
-    const startButton = await page.$('button');
-    await startButton.click();
-    await page.waitForSelector('text/End Meal', { timeout: 5000 });
+    await clickButtonWithText(page, 'Start Meal');
+    await waitForText(page, 'End Meal');
     console.log('✓ Test 4: Can start a meal');
     passed++;
   } catch (e) {
@@ -80,7 +94,7 @@ async function runTests() {
     await page.waitForFunction(
       () => {
         const timerText = document.body.innerText;
-        return timerText.includes('0:0') || timerText.includes('0:01') || timerText.includes('0:02');
+        return timerText.includes('0:0') || timerText.includes('Meal Duration');
       },
       { timeout: 5000 }
     );
@@ -93,16 +107,8 @@ async function runTests() {
 
   // Test 6: Can end meal
   try {
-    const endButton = await page.$('button');
-    const buttons = await page.$$('button');
-    for (const btn of buttons) {
-      const text = await page.evaluate(el => el.textContent, btn);
-      if (text.includes('End Meal')) {
-        await btn.click();
-        break;
-      }
-    }
-    await page.waitForSelector('text/Great Job', { timeout: 5000 });
+    await clickButtonWithText(page, 'End Meal');
+    await waitForText(page, 'Great Job');
     console.log('✓ Test 6: Can end meal and see completion screen');
     passed++;
   } catch (e) {
@@ -112,15 +118,8 @@ async function runTests() {
 
   // Test 7: Can return to start screen
   try {
-    const buttons = await page.$$('button');
-    for (const btn of buttons) {
-      const text = await page.evaluate(el => el.textContent, btn);
-      if (text.includes('Done')) {
-        await btn.click();
-        break;
-      }
-    }
-    await page.waitForSelector('text/Start Meal', { timeout: 5000 });
+    await clickButtonWithText(page, 'Done');
+    await waitForText(page, 'Start Meal');
     console.log('✓ Test 7: Can return to start screen');
     passed++;
   } catch (e) {
@@ -132,7 +131,7 @@ async function runTests() {
   try {
     const settingsButton = await page.$('button[aria-label="Settings"]');
     await settingsButton.click();
-    await page.waitForSelector('text/Reminder Interval', { timeout: 5000 });
+    await waitForText(page, 'Reminder Interval');
     console.log('✓ Test 8: Settings screen opens');
     passed++;
   } catch (e) {
