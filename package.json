@@ -1,0 +1,33 @@
+{
+  "name": "slow-eating",
+  "version": "1.0.0",
+  "description": "Ambient Audio Pacing app - helps you eat slower for better digestion and satiety",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test:e2e": "node tests/e2e/test.js"
+  },
+  "keywords": ["health", "eating", "pacing", "mindfulness"],
+  "author": "bhagwatgita747",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "puppeteer": "^24.10.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7"
+  }
+}
