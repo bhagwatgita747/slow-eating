@@ -16,60 +16,34 @@
 | 4 | Set up Vercel deployment | Done | Auto-deploys on push |
 | 5 | Configure Puppeteer testing | Done | 8/8 tests passing |
 
-### Milestone 1.2: Core Timer UI - DONE
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | Create Start Meal screen | Done | Big animated button |
-| 2 | Build active meal timer display | Done | Circular progress + countdown |
-| 3 | Implement interval settings | Done | 15-30 second range |
-| 4 | Add End Meal button | Done | |
-
-### Milestone 1.3: Feedback System - DONE
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | Implement haptic vibration | Done | Via Capacitor + Navigator fallback |
-| 2 | Add audio beep option | Done | Web Audio API |
-| 3 | Settings toggle for feedback type | Done | Vibration/Sound/Both |
-
-### Milestone 1.4: Stats & History - DONE
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | Post-meal stats screen | Done | Duration, intervals, satiety score |
-| 2 | Local storage for meal history | Done | |
-| 3 | Basic streak tracking | Done | Day streak counter |
-
-### Milestone 1.5: Polish & Deploy - DONE
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | PWA manifest for Android install | Done | |
-| 2 | App icon and splash screen | Done | SVG favicon |
-| 3 | Puppeteer E2E tests | Done | 8 tests, all passing |
-| 4 | Production deployment | Done | Vercel |
+### Milestone 1.2-1.5 - ALL DONE
+All Timer Mode features complete (see Phase 1 in git history)
 
 ---
 
-## Phase 2: Listening Mode (Future)
+## Phase 2: Listening Mode - COMPLETE
 
-### Milestone 2.1: Audio Detection
+### Milestone 2.1: Audio Detection - DONE
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | Microphone permission flow | Pending | |
-| 2 | Integrate TensorFlow.js | Pending | |
-| 3 | Load YAMNet model | Pending | |
-| 4 | Detect eating sounds | Pending | |
+| 1 | Microphone permission flow | Done | MicrophonePermission component |
+| 2 | Create audio detection hook | Done | useAudioDetection.ts |
+| 3 | Frequency analysis | Done | Web Audio API + AnalyserNode |
+| 4 | Detect eating sounds | Done | Amplitude spike detection |
 
-### Milestone 2.2: Intelligent Feedback
+### Milestone 2.2: Intelligent Feedback - DONE
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | Bite event detection | Pending | |
-| 2 | Pace analysis algorithm | Pending | |
-| 3 | Smart vibration triggers | Pending | Only when too fast |
+| 1 | Bite event detection | Done | Configurable thresholds |
+| 2 | Pace analysis algorithm | Done | Interval between bites |
+| 3 | Smart vibration triggers | Done | Only when eating too fast |
 
-### Milestone 2.3: Mode Selection
+### Milestone 2.3: Mode Selection - DONE
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | Settings screen with mode toggle | Pending | Timer vs Listening |
-| 2 | Persist user preference | Pending | |
+| 1 | Settings screen with mode toggle | Done | Timer / Listening |
+| 2 | Persist user preference | Done | localStorage |
+| 3 | Mode indicator on start screen | Done | Shows current mode |
 
 ---
 
@@ -83,6 +57,7 @@
 | 4 | Phase 1 MVP (Timer Mode) | 2025-12-11 |
 | 5 | E2E tests passing (8/8) | 2025-12-11 |
 | 6 | Production deployment live | 2025-12-11 |
+| 7 | **Phase 2 Listening Mode** | 2025-12-11 |
 
 ---
 
@@ -96,6 +71,8 @@
 - [ ] Export meal history
 - [ ] Android APK build via Capacitor
 - [ ] Custom domain for Vercel
+- [ ] TensorFlow.js ML model for better detection
+- [ ] Calibration mode for personalized detection
 
 ---
 
