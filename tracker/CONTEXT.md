@@ -6,7 +6,7 @@
 
 ## Live URLs
 
-- **Web App**: (Pending Vercel deployment)
+- **Web App**: https://slow-eating-dndy404mv-rachits-projects-da69620c.vercel.app
 - **GitHub**: https://github.com/bhagwatgita747/slow-eating
 
 ---
@@ -15,12 +15,11 @@
 
 | Component | Technology |
 |-----------|------------|
-| Frontend | React + Vite + TypeScript |
-| Styling | Tailwind CSS |
-| Native Wrapper | Capacitor (Android) |
+| Frontend | React 19 + Vite 7 + TypeScript |
+| Styling | Tailwind CSS 3.4 |
+| Native Wrapper | Capacitor 7 (Android) |
 | Haptics | @capacitor/haptics |
-| Storage | localStorage (Phase 1) |
-| AI (Phase 2) | TensorFlow.js + YAMNet |
+| Storage | localStorage |
 | Deployment | Vercel |
 | Testing | Puppeteer |
 
@@ -30,11 +29,17 @@
 
 | File | Purpose |
 |------|---------|
-| `src/App.tsx` | Main app component |
-| `src/components/` | UI components |
-| `src/hooks/` | Custom React hooks |
+| `src/App.tsx` | Main app component with screen routing |
+| `src/components/StartMeal.tsx` | Start meal screen |
+| `src/components/ActiveMeal.tsx` | Active meal timer screen |
+| `src/components/MealComplete.tsx` | Post-meal stats screen |
+| `src/components/Settings.tsx` | Settings screen |
+| `src/hooks/useTimer.ts` | Timer logic |
+| `src/hooks/useHaptics.ts` | Haptic/audio feedback |
+| `src/hooks/useMealHistory.ts` | Meal history management |
+| `src/lib/storage.ts` | localStorage utilities |
 | `capacitor.config.ts` | Capacitor configuration |
-| `vite.config.ts` | Vite build configuration |
+| `tests/e2e/test.js` | Puppeteer E2E tests |
 
 ---
 
@@ -65,14 +70,17 @@ npm run build
 # Preview production build
 npm run preview
 
+# Run E2E tests (starts dev server automatically)
+npm run test:e2e
+
+# Run E2E tests against production
+TEST_URL=https://slow-eating-dndy404mv-rachits-projects-da69620c.vercel.app npm run test:e2e
+
 # Sync Capacitor
 npx cap sync
 
 # Open Android Studio
 npx cap open android
-
-# Run Puppeteer tests
-npm run test:e2e
 
 # Deploy to Vercel
 npx vercel --prod
@@ -80,7 +88,7 @@ npx vercel --prod
 
 ---
 
-## Project Structure (Target)
+## Project Structure
 
 ```
 slow-eating/
@@ -97,11 +105,14 @@ slow-eating/
 │   ├── lib/
 │   │   └── storage.ts
 │   ├── App.tsx
-│   └── main.tsx
+│   ├── main.tsx
+│   └── index.css
 ├── public/
-├── android/              # Capacitor Android project
+│   ├── favicon.svg
+│   └── manifest.json
 ├── tests/
-│   └── e2e/              # Puppeteer tests
+│   └── e2e/
+│       └── test.js
 ├── tracker/              # Documentation
 ├── .env                  # Tokens (gitignored)
 ├── .gitignore

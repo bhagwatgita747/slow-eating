@@ -5,46 +5,46 @@
 
 ---
 
-## Phase 1: Timer Mode (MVP)
+## Phase 1: Timer Mode (MVP) - COMPLETE
 
-### Milestone 1.1: Project Setup
+### Milestone 1.1: Project Setup - DONE
 | # | Task | Status | Notes |
 |---|------|--------|-------|
 | 1 | Create GitHub repository | Done | bhagwatgita747/slow-eating |
-| 2 | Initialize React + Vite project | Pending | |
-| 3 | Add Capacitor for Android | Pending | |
-| 4 | Set up Vercel deployment | Pending | |
-| 5 | Configure Puppeteer testing | Pending | |
+| 2 | Initialize React + Vite project | Done | React 19 + Vite 7 + TypeScript |
+| 3 | Add Capacitor for Android | Done | Configured, not yet built |
+| 4 | Set up Vercel deployment | Done | Auto-deploys on push |
+| 5 | Configure Puppeteer testing | Done | 8/8 tests passing |
 
-### Milestone 1.2: Core Timer UI
+### Milestone 1.2: Core Timer UI - DONE
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | Create Start Meal screen | Pending | Big "Start" button |
-| 2 | Build active meal timer display | Pending | Shows interval countdown |
-| 3 | Implement interval settings | Pending | 15-30 second range |
-| 4 | Add End Meal button | Pending | |
+| 1 | Create Start Meal screen | Done | Big animated button |
+| 2 | Build active meal timer display | Done | Circular progress + countdown |
+| 3 | Implement interval settings | Done | 15-30 second range |
+| 4 | Add End Meal button | Done | |
 
-### Milestone 1.3: Feedback System
+### Milestone 1.3: Feedback System - DONE
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | Implement haptic vibration | Pending | Via Capacitor Haptics |
-| 2 | Add audio beep option | Pending | Subtle notification sound |
-| 3 | Settings toggle for feedback type | Pending | Vibration/Sound/Both |
+| 1 | Implement haptic vibration | Done | Via Capacitor + Navigator fallback |
+| 2 | Add audio beep option | Done | Web Audio API |
+| 3 | Settings toggle for feedback type | Done | Vibration/Sound/Both |
 
-### Milestone 1.4: Stats & History
+### Milestone 1.4: Stats & History - DONE
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | Post-meal stats screen | Pending | Duration, intervals completed |
-| 2 | Local storage for meal history | Pending | |
-| 3 | Basic streak tracking | Pending | |
+| 1 | Post-meal stats screen | Done | Duration, intervals, satiety score |
+| 2 | Local storage for meal history | Done | |
+| 3 | Basic streak tracking | Done | Day streak counter |
 
-### Milestone 1.5: Polish & Deploy
+### Milestone 1.5: Polish & Deploy - DONE
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | PWA manifest for Android install | Pending | |
-| 2 | App icon and splash screen | Pending | |
-| 3 | Puppeteer E2E tests | Pending | |
-| 4 | Production deployment | Pending | |
+| 1 | PWA manifest for Android install | Done | |
+| 2 | App icon and splash screen | Done | SVG favicon |
+| 3 | Puppeteer E2E tests | Done | 8 tests, all passing |
+| 4 | Production deployment | Done | Vercel |
 
 ---
 
@@ -80,6 +80,9 @@
 | 1 | Documentation system setup | 2025-12-11 |
 | 2 | GitHub/Vercel connections | 2025-12-11 |
 | 3 | GitHub repository created | 2025-12-11 |
+| 4 | Phase 1 MVP (Timer Mode) | 2025-12-11 |
+| 5 | E2E tests passing (8/8) | 2025-12-11 |
+| 6 | Production deployment live | 2025-12-11 |
 
 ---
 
@@ -91,6 +94,8 @@
 - [ ] Watch app companion (WearOS)
 - [ ] Detailed analytics dashboard
 - [ ] Export meal history
+- [ ] Android APK build via Capacitor
+- [ ] Custom domain for Vercel
 
 ---
 
