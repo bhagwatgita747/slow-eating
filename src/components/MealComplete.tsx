@@ -1,9 +1,11 @@
 import { MealRecord } from '../hooks/useMealHistory'
+import { PacingMode } from './Settings'
 
 interface MealCompleteProps {
   meal: MealRecord
   streak: number
   onNewMeal: () => void
+  pacingMode: PacingMode
 }
 
 function formatDuration(seconds: number): string {
@@ -15,13 +17,16 @@ function formatDuration(seconds: number): string {
   return `${mins} min ${secs} sec`
 }
 
-export default function MealComplete({ meal, streak, onNewMeal }: MealCompleteProps) {
+export default function MealComplete({ meal, streak, onNewMeal, pacingMode }: MealCompleteProps) {
   // Calculate a simple satiety score based on duration
   // Ideal meal is 20+ minutes
   const satietyScore = Math.min(100, Math.round((meal.durationSeconds / 1200) * 100))
 
   // Estimate "fullness hours" - longer meals = feeling full longer
   const fullnessHours = Math.min(6, Math.round((meal.durationSeconds / 60) / 5 * 10) / 10)
+
+  // For listening mode, intervalCount is repurposed as "too fast" count
+  const tooFastCount = meal.intervalCount
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6">
@@ -45,8 +50,19 @@ export default function MealComplete({ meal, streak, onNewMeal }: MealCompletePr
         </div>
 
         <div className="bg-white rounded-xl p-4 shadow-md text-center">
-          <div className="text-3xl font-bold text-primary-600">{meal.intervalCount}</div>
-          <div className="text-sm text-gray-500">Pace Reminders</div>
+          {pacingMode === 'listening' ? (
+            <>
+              <div className={`text-3xl font-bold ${tooFastCount > 0 ? 'text-orange-500' : 'text-primary-600'}`}>
+                {tooFastCount}
+              </div>
+              <div className="text-sm text-gray-500">Too Fast Alerts</div>
+            </>
+          ) : (
+            <>
+              <div className="text-3xl font-bold text-primary-600">{meal.intervalCount}</div>
+              <div className="text-sm text-gray-500">Pace Reminders</div>
+            </>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-4 shadow-md text-center">
@@ -62,9 +78,15 @@ export default function MealComplete({ meal, streak, onNewMeal }: MealCompletePr
 
       {/* Benefit message */}
       <div className="bg-primary-50 rounded-xl p-4 w-full max-w-sm mb-8">
-        <p className="text-primary-800 text-center">
-          By eating mindfully for {formatDuration(meal.durationSeconds)}, you've unlocked up to <strong>{fullnessHours} hours</strong> of sustained fullness.
-        </p>
+        {pacingMode === 'listening' && tooFastCount === 0 ? (
+          <p className="text-primary-800 text-center">
+            Perfect pacing! You ate at a healthy pace throughout your entire meal.
+          </p>
+        ) : (
+          <p className="text-primary-800 text-center">
+            By eating mindfully for {formatDuration(meal.durationSeconds)}, you've unlocked up to <strong>{fullnessHours} hours</strong> of sustained fullness.
+          </p>
+        )}
       </div>
 
       {/* Action buttons */}

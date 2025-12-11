@@ -9,12 +9,19 @@
     "preview": "vite preview",
     "test:e2e": "node tests/e2e/test.js"
   },
-  "keywords": ["health", "eating", "pacing", "mindfulness"],
+  "keywords": [
+    "health",
+    "eating",
+    "pacing",
+    "mindfulness"
+  ],
   "author": "bhagwatgita747",
   "license": "MIT",
   "dependencies": {
     "@capacitor/core": "^7.0.0",
     "@capacitor/haptics": "^7.0.0",
+    "@tensorflow-models/speech-commands": "^0.5.4",
+    "@tensorflow/tfjs": "^4.22.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },

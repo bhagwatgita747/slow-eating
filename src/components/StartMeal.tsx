@@ -1,11 +1,14 @@
+import { PacingMode } from './Settings'
+
 interface StartMealProps {
   onStart: () => void
   onOpenSettings: () => void
   streak: number
   totalMeals: number
+  pacingMode: PacingMode
 }
 
-export default function StartMeal({ onStart, onOpenSettings, streak, totalMeals }: StartMealProps) {
+export default function StartMeal({ onStart, onOpenSettings, streak, totalMeals, pacingMode }: StartMealProps) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6">
       {/* Header */}
@@ -26,6 +29,25 @@ export default function StartMeal({ onStart, onOpenSettings, streak, totalMeals 
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Slow Eating</h1>
         <p className="text-gray-500">Your invisible dining coach</p>
+      </div>
+
+      {/* Mode indicator */}
+      <div className="flex items-center gap-2 mb-8 px-4 py-2 bg-white rounded-full shadow-sm">
+        {pacingMode === 'timer' ? (
+          <>
+            <svg className="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-sm text-gray-600">Timer Mode</span>
+          </>
+        ) : (
+          <>
+            <svg className="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+            </svg>
+            <span className="text-sm text-gray-600">Listening Mode</span>
+          </>
+        )}
       </div>
 
       {/* Stats */}
@@ -52,7 +74,9 @@ export default function StartMeal({ onStart, onOpenSettings, streak, totalMeals 
 
       {/* Instructions */}
       <p className="mt-8 text-center text-gray-400 text-sm max-w-xs">
-        Place your phone on the table. You'll receive gentle reminders to pace your bites.
+        {pacingMode === 'timer'
+          ? 'Place your phone on the table. You\'ll receive gentle reminders to pace your bites.'
+          : 'Place your phone on the table. It will listen for eating sounds and alert you if you\'re eating too fast.'}
       </p>
     </div>
   )
