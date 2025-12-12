@@ -60,6 +60,7 @@ export default function ActiveMealListening({
     error,
     startListening,
     stopListening,
+    getDetectionLog,
   } = useYamnetDetection(handleBiteDetected)
 
   // Start listening once model is loaded
@@ -90,6 +91,7 @@ export default function ActiveMealListening({
   }, [stopListening])
 
   const handleEndMeal = () => {
+    const detectionLog = getDetectionLog()
     stopListening()
     triggerSuccess()
 
@@ -101,6 +103,7 @@ export default function ActiveMealListening({
       intervalCount: tooFastCount,
       intervalSeconds: targetInterval,
       date: new Date().toISOString().split('T')[0],
+      detectionLog,
     }
 
     onEndMeal(meal)

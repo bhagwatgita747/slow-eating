@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { MealRecord } from '../hooks/useMealHistory'
 import { PacingMode } from './Settings'
 
@@ -17,7 +18,15 @@ function formatDuration(seconds: number): string {
   return `${mins} min ${secs} sec`
 }
 
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
 export default function MealComplete({ meal, streak, onNewMeal, pacingMode }: MealCompleteProps) {
+  const [showLog, setShowLog] = useState(false)
+
   // Calculate a simple satiety score based on duration
   // Ideal meal is 20+ minutes
   const satietyScore = Math.min(100, Math.round((meal.durationSeconds / 1200) * 100))
@@ -27,6 +36,9 @@ export default function MealComplete({ meal, streak, onNewMeal, pacingMode }: Me
 
   // For listening mode, intervalCount is repurposed as "too fast" count
   const tooFastCount = meal.intervalCount
+
+  // Get detection log (only for listening mode)
+  const detectionLog = meal.detectionLog || []
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6">
@@ -88,6 +100,53 @@ export default function MealComplete({ meal, streak, onNewMeal, pacingMode }: Me
           </p>
         )}
       </div>
+
+      {/* Detection log toggle (listening mode only) */}
+      {pacingMode === 'listening' && detectionLog.length > 0 && (
+        <button
+          onClick={() => setShowLog(!showLog)}
+          className="mb-4 text-sm text-primary-600 underline"
+        >
+          {showLog ? 'Hide' : 'Show'} Detection Log ({detectionLog.length} entries)
+        </button>
+      )}
+
+      {/* Detection log table */}
+      {showLog && detectionLog.length > 0 && (
+        <div className="w-full max-w-md mb-6 max-h-64 overflow-y-auto">
+          <table className="w-full text-xs border-collapse">
+            <thead className="bg-gray-100 sticky top-0">
+              <tr>
+                <th className="p-2 text-left border-b">Time</th>
+                <th className="p-2 text-left border-b">Sound Detected</th>
+                <th className="p-2 text-right border-b">Conf.</th>
+                <th className="p-2 text-center border-b">Eating?</th>
+                <th className="p-2 text-center border-b">Bite?</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detectionLog.map((entry, i) => (
+                <tr
+                  key={i}
+                  className={`${entry.countedAsBite ? 'bg-green-50' : entry.isEatingSound ? 'bg-yellow-50' : ''}`}
+                >
+                  <td className="p-2 border-b font-mono">{formatTime(entry.elapsedSeconds)}</td>
+                  <td className="p-2 border-b truncate max-w-[150px]" title={entry.className}>
+                    {entry.className}
+                  </td>
+                  <td className="p-2 border-b text-right">{(entry.confidence * 100).toFixed(0)}%</td>
+                  <td className="p-2 border-b text-center">
+                    {entry.isEatingSound ? '✓' : ''}
+                  </td>
+                  <td className="p-2 border-b text-center">
+                    {entry.countedAsBite ? '✓' : ''}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Action buttons */}
       <button

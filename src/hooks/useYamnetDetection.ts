@@ -1,5 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import * as tf from '@tensorflow/tfjs'
+import { YAMNET_CLASS_NAMES } from '../lib/yamnetClasses'
+
+export interface DetectionLogEntry {
+  timestamp: number
+  elapsedSeconds: number
+  className: string
+  confidence: number
+  isEatingSound: boolean
+  countedAsBite: boolean
+}
 
 export interface YamnetDetectionState {
   isListening: boolean
@@ -18,22 +28,24 @@ interface UseYamnetDetectionReturn extends YamnetDetectionState {
   startListening: () => Promise<boolean>
   stopListening: () => void
   resetBiteCount: () => void
+  getDetectionLog: () => DetectionLogEntry[]
+  clearDetectionLog: () => void
 }
 
-// YAMNet class names related to eating
-const EATING_CLASSES = [
-  'Chewing, mastication',
-  'Biting',
-  'Crunch',
-  'Eating',
-  'Drinking',
-  'Sipping',
-  'Cutlery',
-  'Dishes, pots, and pans',
-  'Silverware',
-  'Knife',
-  'Fork',
-  'Spoon',
+// YAMNet class names related to eating (partial matches allowed)
+const EATING_CLASS_KEYWORDS = [
+  'chewing',
+  'mastication',
+  'biting',
+  'crunch',
+  'eating',
+  'drinking',
+  'sipping',
+  'cutlery',
+  'silverware',
+  'dishes',
+  'pots',
+  'pans',
 ]
 
 // Minimum time between bite detections (ms)
@@ -44,9 +56,6 @@ const CONFIDENCE_THRESHOLD = 0.3
 
 // YAMNet model URL from TensorFlow Hub
 const YAMNET_MODEL_URL = 'https://tfhub.dev/google/tfjs-model/yamnet/tfjs/1'
-
-// YAMNet class map URL
-const CLASS_MAP_URL = 'https://raw.githubusercontent.com/tensorflow/models/master/research/audioset/yamnet/yamnet_class_map.csv'
 
 export function useYamnetDetection(
   onBiteDetected: () => void
@@ -65,29 +74,13 @@ export function useYamnetDetection(
   })
 
   const modelRef = useRef<tf.GraphModel | null>(null)
-  const classNamesRef = useRef<string[]>([])
   const audioContextRef = useRef<AudioContext | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const processorRef = useRef<ScriptProcessorNode | null>(null)
   const lastBiteTimeRef = useRef<number>(0)
   const isProcessingRef = useRef<boolean>(false)
-
-  // Load class names
-  const loadClassNames = useCallback(async () => {
-    try {
-      const response = await fetch(CLASS_MAP_URL)
-      const text = await response.text()
-      const lines = text.trim().split('\n').slice(1) // Skip header
-      classNamesRef.current = lines.map(line => {
-        const parts = line.split(',')
-        return parts.slice(2).join(',').replace(/"/g, '').trim()
-      })
-    } catch (e) {
-      console.warn('Failed to load class names, using defaults:', e)
-      // Fallback - YAMNet has 521 classes, but we only care about eating-related ones
-      classNamesRef.current = []
-    }
-  }, [])
+  const detectionLogRef = useRef<DetectionLogEntry[]>([])
+  const startTimeRef = useRef<number>(0)
 
   // Load YAMNet model
   const loadModel = useCallback(async () => {
@@ -97,9 +90,6 @@ export function useYamnetDetection(
 
     try {
       await tf.ready()
-
-      // Load class names first
-      await loadClassNames()
 
       // Load the model
       const model = await tf.loadGraphModel(YAMNET_MODEL_URL, {
@@ -123,7 +113,13 @@ export function useYamnetDetection(
         error: `Failed to load audio model: ${error.message}`,
       }))
     }
-  }, [state.isLoadingModel, loadClassNames])
+  }, [state.isLoadingModel])
+
+  // Check if class name is eating-related
+  const isEatingRelated = useCallback((className: string): boolean => {
+    const lowerName = className.toLowerCase()
+    return EATING_CLASS_KEYWORDS.some(keyword => lowerName.includes(keyword))
+  }, [])
 
   // Process audio and classify
   const processAudio = useCallback(async (audioData: Float32Array) => {
@@ -153,14 +149,11 @@ export function useYamnetDetection(
         }
       }
 
-      // Get class name
-      const className = classNamesRef.current[maxIndex] || `Class ${maxIndex}`
+      // Get class name from embedded list
+      const className = YAMNET_CLASS_NAMES[maxIndex] || `Unknown (${maxIndex})`
 
       // Check if it's an eating-related sound
-      const isEatingSound = EATING_CLASSES.some(ec =>
-        className.toLowerCase().includes(ec.toLowerCase()) ||
-        ec.toLowerCase().includes(className.toLowerCase())
-      )
+      const isEatingSound = isEatingRelated(className)
 
       setState(prev => ({
         ...prev,
@@ -168,20 +161,35 @@ export function useYamnetDetection(
         confidence: maxScore,
       }))
 
-      // If eating sound detected with sufficient confidence
-      if (isEatingSound && maxScore > CONFIDENCE_THRESHOLD) {
-        const now = Date.now()
-        const timeSinceLastBite = now - lastBiteTimeRef.current
+      // Determine if this counts as a bite
+      const now = Date.now()
+      const timeSinceLastBite = now - lastBiteTimeRef.current
+      const countedAsBite = isEatingSound &&
+        maxScore > CONFIDENCE_THRESHOLD &&
+        timeSinceLastBite >= MIN_BITE_INTERVAL
 
-        if (timeSinceLastBite >= MIN_BITE_INTERVAL) {
-          lastBiteTimeRef.current = now
-          setState(prev => ({
-            ...prev,
-            lastBiteTime: now,
-            biteCount: prev.biteCount + 1,
-          }))
-          onBiteDetected()
+      // Log all detections with confidence > 10% (for debugging)
+      if (maxScore > 0.1) {
+        const logEntry: DetectionLogEntry = {
+          timestamp: now,
+          elapsedSeconds: Math.floor((now - startTimeRef.current) / 1000),
+          className,
+          confidence: maxScore,
+          isEatingSound,
+          countedAsBite,
         }
+        detectionLogRef.current.push(logEntry)
+      }
+
+      // If eating sound detected with sufficient confidence
+      if (countedAsBite) {
+        lastBiteTimeRef.current = now
+        setState(prev => ({
+          ...prev,
+          lastBiteTime: now,
+          biteCount: prev.biteCount + 1,
+        }))
+        onBiteDetected()
       }
 
       // Cleanup tensors
@@ -192,7 +200,7 @@ export function useYamnetDetection(
     } finally {
       isProcessingRef.current = false
     }
-  }, [onBiteDetected])
+  }, [onBiteDetected, isEatingRelated])
 
   // Cleanup
   const cleanup = useCallback(() => {
@@ -217,6 +225,10 @@ export function useYamnetDetection(
       if (!modelRef.current) {
         await loadModel()
       }
+
+      // Reset detection log and start time
+      detectionLogRef.current = []
+      startTimeRef.current = Date.now()
 
       // Request microphone
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -296,13 +308,20 @@ export function useYamnetDetection(
     lastBiteTimeRef.current = 0
   }, [])
 
+  // Get detection log
+  const getDetectionLog = useCallback((): DetectionLogEntry[] => {
+    return [...detectionLogRef.current]
+  }, [])
+
+  // Clear detection log
+  const clearDetectionLog = useCallback(() => {
+    detectionLogRef.current = []
+  }, [])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       cleanup()
-      if (modelRef.current) {
-        // Model cleanup if needed
-      }
     }
   }, [cleanup])
 
@@ -316,5 +335,7 @@ export function useYamnetDetection(
     startListening,
     stopListening,
     resetBiteCount,
+    getDetectionLog,
+    clearDetectionLog,
   }
 }

@@ -7,13 +7,20 @@
 ---
 
 ## Last Updated
-**2025-12-11 18:45 IST**
+**2025-12-12 00:15 IST**
 
 ---
 
 ## What We Were Working On
 
-### Today (2025-12-11)
+### Today (2025-12-12)
+- Upgraded audio detection from amplitude-based to ML-based
+- Implemented TensorFlow.js + YAMNet model for sound classification
+- YAMNet classifies 521 audio classes including eating sounds
+- UI now shows detected sound class and confidence for debugging
+- All 8 E2E tests passing on production
+
+### Previous (2025-12-11)
 - Set up complete documentation/tracker system
 - Connected GitHub (bhagwatgita747) and Vercel (rachit)
 - Created GitHub repository: slow-eating
@@ -27,14 +34,15 @@
 - Local storage for meal history and streaks
 - PWA manifest for Android installability
 
-**Phase 2 (Listening Mode) - COMPLETE:**
+**Phase 2 (Listening Mode) - UPGRADED TO ML:**
 - Mode toggle in Settings (Timer/Listening)
-- useAudioDetection hook with Web Audio API
-- Frequency analysis for bite detection
-- Amplitude spike detection for eating sounds
+- ~~useAudioDetection hook with Web Audio API~~ (replaced)
+- **NEW: useYamnetDetection hook with TensorFlow.js**
+- YAMNet model loads from TensorFlow Hub
+- Detects 12 eating-related classes: Chewing, Biting, Crunch, Cutlery, etc.
+- Shows detected sound and confidence in UI for debugging
 - Too-fast pace alerting with haptic/sound feedback
 - Microphone permission flow with privacy messaging
-- ActiveMealListening component with real-time audio viz
 - All 8 E2E tests passing on production
 
 ### Previous Session
@@ -54,7 +62,7 @@
 
 ## Live URLs
 
-- **Production**: https://slow-eating-bioa5a4rh-rachits-projects-da69620c.vercel.app
+- **Production**: https://slow-eating-4c5m2mfn1-rachits-projects-da69620c.vercel.app
 - **GitHub**: https://github.com/bhagwatgita747/slow-eating
 
 ---
@@ -63,28 +71,43 @@
 
 | Decision | Reason |
 |----------|--------|
-| Web Audio API instead of ML | Lighter, faster, works offline without large model download |
-| Amplitude spike detection | Simple, reliable for cutlery/chewing sounds |
-| 2-second min bite interval | Prevents double-counting from continuous sounds |
+| ~~Web Audio API instead of ML~~ | ~~Lighter, faster, works offline without large model download~~ |
+| **YAMNet ML model via TF Hub** | Amplitude detection failed in testing; ML provides proper sound classification |
+| 3-second min bite interval | Prevents double-counting; increased from 2s for ML processing |
+| 30% confidence threshold | Balance between sensitivity and false positives |
 | Fallback to Timer Mode | If mic permission denied, gracefully falls back |
 
 ---
 
 ## Audio Detection Config
 
-Located in `src/hooks/useAudioDetection.ts`:
+Located in `src/hooks/useYamnetDetection.ts`:
 
 ```typescript
-const CONFIG = {
-  AMPLITUDE_THRESHOLD: 0.15,      // 0-1 scale
-  MIN_BITE_INTERVAL: 2000,        // ms between detections
-  SOUND_DURATION_THRESHOLD: 100,  // ms sound must persist
-  MIN_FREQUENCY: 200,             // Hz
-  MAX_FREQUENCY: 4000,            // Hz
-}
+// YAMNet class names related to eating
+const EATING_CLASSES = [
+  'Chewing, mastication',
+  'Biting',
+  'Crunch',
+  'Eating',
+  'Drinking',
+  'Sipping',
+  'Cutlery',
+  'Dishes, pots, and pans',
+  'Silverware',
+  'Knife',
+  'Fork',
+  'Spoon',
+]
+
+// Minimum time between bite detections (ms)
+const MIN_BITE_INTERVAL = 3000
+
+// Confidence threshold for detection
+const CONFIDENCE_THRESHOLD = 0.3
 ```
 
-These can be tuned based on real-world testing.
+YAMNet model loads from TensorFlow Hub (~16MB). UI shows detected class for debugging.
 
 ---
 

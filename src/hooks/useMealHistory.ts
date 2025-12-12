@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { loadMeals, saveMeals } from '../lib/storage'
+import { DetectionLogEntry } from './useYamnetDetection'
 
 export interface MealRecord {
   id: string
@@ -9,6 +10,7 @@ export interface MealRecord {
   intervalCount: number
   intervalSeconds: number
   date: string
+  detectionLog?: DetectionLogEntry[]
 }
 
 interface UseMealHistoryReturn {
